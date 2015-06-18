@@ -138,8 +138,8 @@ defaultDevelOpts = DevelOpts
 
 cabalProgram :: DevelOpts -> FilePath
 cabalProgram opts
-  | isCabalDev opts = "cabal-dev"
-  | otherwise       = "cabal"
+  | isCabalDev opts = "stack"
+  | otherwise       = "stack"
 
 -- | Run a reverse proxy from port 3000 to 3001. If there is no response on
 -- 3001, give an appropriate message to the user.
@@ -343,17 +343,7 @@ runBuildHook Nothing = return ()
 configure :: DevelOpts -> [String] -> IO Bool
 configure opts extraArgs =
   checkExit =<< createProcess (proc (cabalProgram opts) $
-                                 [ "configure"
-                                 , "-flibrary-only"
-                                 , "--disable-tests"
-                                 , "--disable-benchmarks"
-                                 , "-fdevel"
-                                 , "--disable-library-profiling"
-                                 , "--with-ld=yesod-ld-wrapper"
-                                 , "--with-ghc=yesod-ghc-wrapper"
-                                 , "--with-ar=yesod-ar-wrapper"
-                                 , "--with-hc-pkg=ghc-pkg"
-                                 ] ++ extraArgs
+                                 ["build"] --  ++ extraArgs
                )
 
 removeFileIfExists :: FilePath -> IO ()
@@ -390,7 +380,7 @@ rebuildCabal opts = do
   checkExit =<< createProcess (proc (cabalProgram opts) args)
     where
       args | verbose opts = [ "build" ]
-           | otherwise    = [ "build", "-v0" ]
+           | otherwise    = [ "build" ]
 
 try_ :: forall a. IO a -> IO ()
 try_ x = void (Ex.try x :: IO (Either Ex.SomeException a))
